@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tic-Tac-Gone">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Tic-Tac-Gone</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100%; }
+
+  :root {
+    --bg-base: #050514;
+    --bg-grad-1: #ff006e;
+    --bg-grad-2: #3a86ff;
+    --bg-grad-3: #8338ec;
+    --bg-grad-4: #06ffa5;
+    --bg-grad-end-1: #0a0a1f;
+    --bg-grad-end-2: #1a0a2f;
+    --text: #ffffff;
+    --text-soft: rgba(255,255,255,0.85);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg-strong: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-border-strong: rgba(255, 255, 255, 0.3);
+    --x-color: #ff4d6d;
+    --x-glow: 255, 77, 109;
+    --o-color: #4cc9f0;
+    --o-glow: 76, 201, 240;
+    --accent: #06ffa5;
+    --shadow-strong: rgba(0, 0, 0, 0.5);
+  }
+
+  body.theme-light {
+    --bg-base: #f0f4ff;
+    --bg-grad-1: #ff8cb0;
+    --bg-grad-2: #87b6ff;
+    --bg-grad-3: #c5a3ff;
+    --bg-grad-4: #7fffd4;
+    --bg-grad-end-1: #e8efff;
+    --bg-grad-end-2: #ffe8f5;
+    --text: #1a1a2e;
+    --text-soft: rgba(26,26,46,0.75);
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-bg-strong: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-border-strong: rgba(255, 255, 255, 0.8);
+    --x-color: #d6336c;
+    --x-glow: 214, 51, 108;
+    --o-color: #1c7ed6;
+    --o-glow: 28, 126, 214;
+    --accent: #0ca678;
+    --shadow-strong: rgba(0, 0, 0, 0.15);
+  }
+
+  body.theme-cyber {
+    --bg-base: #000;
+    --bg-grad-1: #00ffea;
+    --bg-grad-2: #ff00aa;
+    --bg-grad-3: #ffea00;
+    --bg-grad-4: #00ff66;
+    --bg-grad-end-1: #001016;
+    --bg-grad-end-2: #100016;
+    --x-color: #ff00aa;
+    --x-glow: 255, 0, 170;
+    --o-color: #00ffea;
+    --o-glow: 0, 255, 234;
+    --accent: #ffea00;
+  }
+
+  body {
+    font-family: 'Segoe UI', 'SF Pro Display', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 12px;
+    position: relative;
+    overflow-x: hidden;
+    background: var(--bg-base);
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -10%;
+    background:
+      radial-gradient(circle at 20% 20%, var(--bg-grad-1) 0%, transparent 40%),
+      radial-gradient(circle at 80% 30%, var(--bg-grad-2) 0%, transparent 45%),
+      radial-gradient(circle at 50% 80%, var(--bg-grad-3) 0%, transparent 50%),
+      radial-gradient(circle at 90% 90%, var(--bg-grad-4) 0%, transparent 40%),
+      linear-gradient(135deg, var(--bg-grad-end-1), var(--bg-grad-end-2));
+    z-index: -2;
+    animation: bgShift 15s ease-in-out infinite alternate;
+    filter: blur(60px);
+    transition: opacity 0.4s ease;
+  }
+
+  @keyframes bgShift {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(2deg); }
+    100% { transform: scale(1) rotate(-2deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    margin-bottom: 6px;
+    font-size: clamp(1.5em, 5vw, 2.4em);
+    font-weight: 800;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, var(--text), var(--accent), var(--text));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(179, 224, 255, 0.5));
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .subtitle {
+    margin-bottom: 14px;
+    opacity: 0.85;
+    text-align: center;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    font-size: 0.85em;
+    padding: 0 10px;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 8px 30px var(--shadow-strong),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+  }
+
+  .topbar {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .icon-btn {
+    width: 42px; height: 42px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scorebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 14px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+  .score-cell {
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+  }
+  .score-name {
+    font-size: 0.7em;
+    opacity: 0.8;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .score-value {
+    font-size: 1.5em;
+    font-weight: 800;
+  }
+  .score-x .score-value { color: var(--x-color); text-shadow: 0 0 10px rgba(var(--x-glow),0.6); }
+  .score-o .score-value { color: var(--o-color); text-shadow: 0 0 10px rgba(var(--o-glow),0.6); }
+  .score-d .score-value { color: var(--accent); text-shadow: 0 0 10px rgba(6,255,165,0.5); }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 420px;
+    width: 100%;
+  }
+
+  button {
+    padding: 10px 16px;
+    border: 1px solid var(--glass-border-strong);
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px var(--shadow-strong), inset 0 1px 0 rgba(255,255,255,0.2);
+    min-height: 44px;
+    font-family: inherit;
+  }
+  button:hover:not(:disabled) {
+    background: var(--glass-bg-strong);
+    transform: translateY(-2px);
+  }
+  button:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+  button.active {
+    background: linear-gradient(135deg, rgba(6, 255, 165, 0.35), rgba(58, 134, 255, 0.35));
+    border-color: rgba(6, 255, 165, 0.6);
+    box-shadow: 0 0 20px rgba(6, 255, 165, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .difficulty {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 4px;
+    border-radius: 50px;
+  }
+  .difficulty button {
+    flex: 1;
+    padding: 8px 14px;
+    font-size: 0.8em;
+    border-radius: 50px;
+    box-shadow: none;
+    background: transparent;
+    border: 1px solid transparent;
+    min-height: 36px;
+  }
+  .difficulty button.active {
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border-strong);
+    box-shadow: 0 0 15px rgba(var(--o-glow), 0.4);
+  }
+
+  .status {
+    font-size: 1em;
+    margin-bottom: 14px;
+    min-height: 1.4em;
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+    padding: 10px 18px;
+    border-radius: 50px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+  }
+  .status.changed { animation: statusPop 0.25s ease-out; }
+  @keyframes statusPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+  .status.victory {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 0, 110, 0.25));
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    animation: victoryPulse 1.5s ease-in-out infinite;
+    font-size: 1.15em;
+    font-weight: 700;
+  }
+  @keyframes victoryPulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    padding: 10px;
+    border-radius: 20px;
+    width: min(92vw, 360px);
+    height: min(92vw, 360px);
+    position: relative;
+    animation: fadeIn 0.35s ease-out;
+  }
+
+  .board::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 20px;
+    background: linear-gradient(135deg,
+      rgba(255, 0, 110, 0.4),
+      rgba(58, 134, 255, 0.4),
+      rgba(6, 255, 165, 0.4));
+    z-index: -1;
+    filter: blur(15px);
+    opacity: 0.6;
+    animation: borderShift 8s ease-in-out infinite alternate;
+  }
+  @keyframes borderShift {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.8; }
+  }
+
+  .cell {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(2.2em, 10vw, 3.5em);
+    font-weight: 900;
+    cursor: pointer;
+    color: var(--text);
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    box-shadow: 0 4px 12px var(--shadow-strong), inset 0 1px 0 rgba(255,255,255,0.15);
+    overflow: hidden;
+  }
+  .cell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 50%);
+    pointer-events: none;
+  }
+  .cell:hover:not(.taken) {
+    background: var(--glass-bg-strong);
+    transform: scale(1.04);
+  }
+  .cell.taken { cursor: default; }
+  .cell.x {
+    color: var(--x-color);
+    text-shadow:
+      0 0 10px rgba(var(--x-glow), 1),
+      0 0 25px rgba(var(--x-glow), 0.7),
+      0 0 50px rgba(var(--x-glow), 0.4);
+    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.12);
+  }
+  .cell.o {
+    color: var(--o-color);
+    text-shadow:
+      0 0 10px rgba(var(--o-glow), 1),
+      0 0 25px rgba(var(--o-glow), 0.7),
+      0 0 50px rgba(var(--o-glow), 0.4);
+    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.12);
+  }
+  .cell.x.taken { border-color: rgba(var(--x-glow), 0.5); box-shadow: 0 4px 12px var(--shadow-strong), inset 0 0 25px rgba(var(--x-glow), 0.25); }
+  .cell.o.taken { border-color: rgba(var(--o-glow), 0.5); box-shadow: 0 4px 12px var(--shadow-strong), inset 0 0 25px rgba(var(--o-glow), 0.25); }
+  .cell.placed { animation: placeMark 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes placeMark {
+    0% { transform: scale(0.3); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+  .cell.vanishing { animation: vanish 0.4s ease-in forwards; }
+  @keyframes vanish {
+    0% { transform: scale(1); opacity: 1; filter: blur(0); }
+    100% { transform: scale(0) rotate(180deg); opacity: 0; filter: blur(6px); }
+  }
+  .cell.winner { animation: winnerGlow 0.7s ease-in-out infinite alternate; }
+  @keyframes winnerGlow {
+    from { box-shadow: 0 4px 12px var(--shadow-strong), 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.4); transform: scale(1); }
+    to { box-shadow: 0 4px 12px var(--shadow-strong), 0 0 50px rgba(255, 215, 0, 1), inset 0 0 30px rgba(255, 215, 0, 0.6); transform: scale(1.06); }
+  }
+
+  .fade-badge {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.32em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    animation: badgePop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes badgePop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .fade-badge.next {
+    background: rgba(255, 0, 80, 0.7) !important;
+    border-color: rgba(255, 0, 80, 1);
+    animation: pulseBadge 0.9s infinite;
+  }
+  @keyframes pulseBadge {
+    0%,100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 80, 0.9); }
+    50% { transform: scale(1.25); box-shadow: 0 0 25px rgba(255, 0, 80, 1); }
+  }
+
+  .info {
+    margin-top: 16px;
+    padding: 12px 18px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.82em;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .legend {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    font-size: 0.75em;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    border-radius: 50px;
+    max-width: 420px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75em; font-weight: 800; color: #fff;
+  }
+
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1000;
+    animation: confettiFall 2.5s ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    max-width: 420px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 22px;
+    border-radius: 20px;
+  }
+  .modal h2 {
+    font-size: 1.3em;
+    margin-bottom: 14px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .modal label {
+    display: block;
+    font-size: 0.85em;
+    margin-bottom: 4px;
+    margin-top: 12px;
+    opacity: 0.85;
+  }
+  .modal input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border-strong);
+    background: var(--glass-bg);
+    color: var(--text);
+    font-size: 1em;
+    font-family: inherit;
+  }
+  .modal input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(6,255,165,0.2);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    justify-content: flex-end;
+  }
+  .history-list {
+    list-style: none;
+    margin-top: 10px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .history-item {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    margin-bottom: 6px;
+    font-size: 0.85em;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .history-result {
+    font-weight: 700;
+  }
+  .history-result.win-x { color: var(--x-color); }
+  .history-result.win-o { color: var(--o-color); }
+  .history-result.draw { color: var(--accent); }
+  .history-time {
+    opacity: 0.6;
+    font-size: 0.85em;
+  }
+  .history-empty {
+    text-align: center;
+    padding: 30px 10px;
+    opacity: 0.6;
+    font-size: 0.9em;
+  }
+  .theme-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .theme-swatch {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .theme-swatch.active {
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+  .theme-swatch[data-theme="dark"] {
+    background: linear-gradient(135deg, #ff006e, #3a86ff, #8338ec);
+  }
+  .theme-swatch[data-theme="light"] {
+    background: linear-gradient(135deg, #ff8cb0, #87b6ff, #c5a3ff);
+  }
+  .theme-swatch[data-theme="cyber"] {
+    background: linear-gradient(135deg, #00ffea, #ff00aa, #ffea00);
+  }
+
+  @media (max-width: 380px) {
+    body { padding: 14px 8px; }
+    .topbar, .controls, .scorebar, .status, .info, .legend { max-width: 100%; }
+    .icon-btn { width: 38px; height: 38px; }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>TIC-TAC-GONE</h1>
+<p class="subtitle">3 marks max · 4th move erases the 1st</p>
+
+<div class="topbar">
+  <button class="icon-btn glass" id="namesBtn" title="Player names">👤</button>
+  <button class="icon-btn glass" id="themeBtn" title="Theme">🎨</button>
+  <button class="icon-btn glass" id="historyBtn" title="History">📜</button>
+  <button class="icon-btn glass" id="soundBtn" title="Sound">🔊</button>
+  <button class="icon-btn glass" id="hintsBtn" title="Show vanish hints">👁️</button>
+  <button class="icon-btn glass" id="resetScoreBtn" title="Reset score">♻️</button>
+</div>
+
+<div class="scorebar glass">
+  <div class="score-cell score-x">
+    <div class="score-name" id="nameLabelX">Player X</div>
+    <div class="score-value" id="scoreX">0</div>
+  </div>
+  <div class="score-cell score-d">
+    <div class="score-name">Draws</div>
+    <div class="score-value" id="scoreD">0</div>
+  </div>
+  <div class="score-cell score-o">
+    <div class="score-name" id="nameLabelO">Player O</div>
+    <div class="score-value" id="scoreO">0</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="modePlay" class="active">2-Player</button>
+  <button id="modeTrain">vs Computer</button>
+  <button id="resetBtn">New Game</button>
+</div>
+
+<div class="difficulty glass" id="difficultyBar" style="display:none">
+  <button data-diff="easy">Easy</button>
+  <button data-diff="medium">Medium</button>
+  <button data-diff="hard" class="active">Hard</button>
+</div>
+
+<div class="status glass" id="status">Player X's turn</div>
+
+<div class="board glass" id="board"></div>
+
+<div class="legend glass" id="legend" style="display:none">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,0,80,0.7);box-shadow:0 0 10px rgba(255,0,80,0.8)">1</div> next</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,179,179,0.4)">2</div> after</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,179,179,0.4)">3</div> newest</div>
+</div>
+
+<div class="info glass" id="info">
+  <b>2-Player Mode:</b> Take turns. After your 3rd mark, the next move erases your oldest one.
+</div>
+
+<div class="modal-overlay" id="namesModal">
+  <div class="modal glass">
+    <h2>👤 Player Names</h2>
+    <label>Player X</label>
+    <input type="text" id="inputX" maxlength="14" placeholder="Player X">
+    <label>Player O / Computer</label>
+    <input type="text" id="inputO" maxlength="14" placeholder="Player O">
+    <div class="modal-actions">
+      <button class="modal-close">Cancel</button>
+      <button class="active" id="saveNames">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="themeModal">
+  <div class="modal glass">
+    <h2>🎨 Theme</h2>
+    <p style="text-align:center;font-size:0.85em;opacity:0.8">Pick a vibe</p>
+    <div class="theme-options">
+      <div class="theme-swatch active" data-theme="dark" title="Dark Neon"></div>
+      <div class="theme-swatch" data-theme="light" title="Pastel Light"></div>
+      <div class="theme-swatch" data-theme="cyber" title="Cyberpunk"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-close active">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historyModal">
+  <div class="modal glass">
+    <h2>📜 Match History</h2>
+    <ul class="history-list" id="historyList"></ul>
+    <div class="modal-actions">
+      <button id="clearHistory">Clear</button>
+      <button class="modal-close active">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'vttt_state_v1';
+const defaultState = {
+  scores: { X: 0, O: 0, draws: 0 },
+  names: { X: 'Player X', O: 'Player O' },
+  theme: 'dark',
+  sound: true,
+  difficulty: 'hard',
+  showHints: false,
+  history: []
+};
+let saved;
+try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { saved = {}; }
+const persist = { ...defaultState, ...saved };
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(persist)); } catch {}
+}
+
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const infoEl = document.getElementById('info');
+const legendEl = document.getElementById('legend');
+const difficultyBar = document.getElementById('difficultyBar');
+
+let board = Array(9).fill(null);
+let queues = { X: [], O: [] };
+let currentPlayer = 'X';
+let gameOver = false;
+let mode = 'play';
+let winningLine = null;
+let busy = false;
+const HUMAN = 'X';
+const CPU = 'O';
+
+const wins = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+  }
+  return audioCtx;
+}
+function beep(freq, duration = 0.1, type = 'sine', volume = 0.15) {
+  if (!persist.sound) return;
+  const ctx = getAudio();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = volume;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
+const sounds = {
+  place: () => beep(660, 0.08, 'triangle', 0.12),
+  vanish: () => beep(220, 0.25, 'sawtooth', 0.08),
+  win: () => {
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'sine', 0.18), i * 100));
+  },
+  draw: () => beep(330, 0.4, 'square', 0.1),
+  click: () => beep(800, 0.04, 'sine', 0.08),
+  toggle: () => beep(500, 0.06, 'square', 0.1)
+};
+
+function buildBoard() {
+  boardEl.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.idx = i;
+    c.addEventListener('click', () => handleClick(i));
+    boardEl.appendChild(c);
+  }
+  render();
+}
+
+function render(animateIdx = -1) {
+  const cells = boardEl.children;
+  for (let i = 0; i < 9; i++) {
+    const c = cells[i];
+    if (c.classList.contains('vanishing')) continue;
+    c.classList.remove('x','o','taken','placed','winner');
+    c.innerHTML = '';
+    if (board[i]) {
+      c.textContent = board[i];
+      c.classList.add(board[i].toLowerCase(), 'taken');
+      if (i === animateIdx) c.classList.add('placed');
+    }
+  }
+  if (winningLine) winningLine.forEach(idx => cells[idx].classList.add('winner'));
+  if (persist.showHints && !gameOver) {
+    ['X','O'].forEach(player => {
+      const q = queues[player];
+      q.forEach((idx, pos) => {
+        if (cells[idx].classList.contains('vanishing')) return;
+        const order = pos + 1;
+        const badge = document.createElement('div');
+        badge.className = 'fade-badge';
+        if (pos === 0 && q.length === 3) badge.classList.add('next');
+        badge.textContent = order;
+        if (!badge.classList.contains('next')) {
+          if (player === 'X') {
+            badge.style.background = 'rgba(255, 77, 109, 0.5)';
+            badge.style.borderColor = 'rgba(255, 77, 109, 0.9)';
+          } else {
+            badge.style.background = 'rgba(76, 201, 240, 0.5)';
+            badge.style.borderColor = 'rgba(76, 201, 240, 0.9)';
+          }
+        }
+        cells[idx].appendChild(badge);
+      });
+    });
+  }
+}
+
+function handleClick(idx) {
+  if (gameOver || busy || board[idx]) return;
+  if (mode === 'train' && currentPlayer !== HUMAN) return;
+  makeMove(currentPlayer, idx);
+}
+
+function makeMove(player, idx) {
+  busy = true;
+  let vanishPromise = Promise.resolve();
+  if (queues[player].length === 3) {
+    const removedIdx = queues[player].shift();
+    const vCell = boardEl.children[removedIdx];
+    vCell.classList.add('vanishing');
+    sounds.vanish();
+    vanishPromise = new Promise(resolve => {
+      setTimeout(() => {
+        board[removedIdx] = null;
+        vCell.classList.remove('vanishing');
+        resolve();
+      }, 400);
+    });
+  }
+  vanishPromise.then(() => {
+    board[idx] = player;
+    queues[player].push(idx);
+    sounds.place();
+    render(idx);
+    setTimeout(() => {
+      const winner = checkWin();
+      if (winner) {
+        gameOver = true;
+        render();
+        recordResult(winner);
+        const winLabel = mode === 'train'
+          ? (winner === HUMAN ? `${persist.names.X} wins!` : `${persist.names.O} wins!`)
+          : `${persist.names[winner]} wins!`;
+        statusEl.textContent = `🎉 ${winLabel} 🎉`;
+        statusEl.classList.add('victory');
+        sounds.win();
+        launchConfetti();
+        busy = false;
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      updateStatus();
+      busy = false;
+      if (mode === 'train' && currentPlayer === CPU && !gameOver) {
+        setTimeout(cpuMove, 500);
+      }
+    }, 350);
+  });
+}
+
+function checkWin() {
+  for (const combo of wins) {
+    const [a,b,c] = combo;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      winningLine = combo;
+      return board[a];
+    }
+  }
+  winningLine = null;
+  return null;
+}
+
+function updateStatus() {
+  if (gameOver) return;
+  const q = queues[currentPlayer];
+  const name = mode === 'train'
+    ? (currentPlayer === HUMAN ? `${persist.names.X}'s turn` : 'Computer thinking...')
+    : `${persist.names[currentPlayer]}'s turn`;
+  let msg = name;
+  if (persist.showHints && q.length === 3) {
+    msg += ` · next move erases #${q[0]}`;
+  }
+  statusEl.textContent = msg;
+  statusEl.classList.remove('changed');
+  void statusEl.offsetWidth;
+  statusEl.classList.add('changed');
+}
+
+function reset() {
+  board = Array(9).fill(null);
+  queues = { X: [], O: [] };
+  currentPlayer = 'X';
+  gameOver = false;
+  busy = false;
+  winningLine = null;
+  statusEl.classList.remove('victory');
+  buildBoard();
+  updateStatus();
+}
+
+function recordResult(winner) {
+  if (winner === 'X') persist.scores.X++;
+  else if (winner === 'O') persist.scores.O++;
+  else persist.scores.draws++;
+
+  const winnerName = winner === 'draw' ? 'Draw' : persist.names[winner];
+  persist.history.unshift({
+    winner,
+    winnerName,
+    mode: mode === 'train' ? `vs CPU (${persist.difficulty})` : '2P',
+    time: Date.now()
+  });
+  if (persist.history.length > 50) persist.history.pop();
+  save();
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('scoreX').textContent = persist.scores.X;
+  document.getElementById('scoreO').textContent = persist.scores.O;
+  document.getElementById('scoreD').textContent = persist.scores.draws;
+  document.getElementById('nameLabelX').textContent = persist.names.X;
+  document.getElementById('nameLabelO').textContent = mode === 'train' ? 'Computer' : persist.names.O;
+}
+
+function updateHintsUI() {
+  legendEl.style.display = persist.showHints ? 'flex' : 'none';
+  const btn = document.getElementById('hintsBtn');
+  btn.textContent = persist.showHints ? '👁️' : '🚫';
+  btn.classList.toggle('active', persist.showHints);
+}
+
+function launchConfetti() {
+  const colors = ['#ff006e', '#3a86ff', '#06ffa5', '#ffd60a', '#8338ec', '#4cc9f0'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-20px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.3 + 's';
+    piece.style.animationDuration = (1.8 + Math.random() * 1.5) + 's';
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.boxShadow = `0 0 10px ${piece.style.background}`;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3500);
+  }
+}
+
+function simulateMove(state, player, idx) {
+  const nb = [...state.board];
+  const nq = { X: [...state.queues.X], O: [...state.queues.O] };
+  if (nq[player].length === 3) {
+    const rm = nq[player].shift();
+    nb[rm] = null;
+  }
+  nb[idx] = player;
+  nq[player].push(idx);
+  return { board: nb, queues: nq };
+}
+function getWinner(b) {
+  for (const [a,b2,c] of wins) {
+    if (b[a] && b[a] === b[b2] && b[a] === b[c]) return b[a];
+  }
+  return null;
+}
+function availableMoves(b) {
+  const m = [];
+  for (let i = 0; i < 9; i++) if (!b[i]) m.push(i);
+  return m;
+}
+function evaluate(state) {
+  let score = 0;
+  for (const [a,b,c] of wins) {
+    const line = [state.board[a], state.board[b], state.board[c]];
+    const cpuC = line.filter(x => x === CPU).length;
+    const humC = line.filter(x => x === HUMAN).length;
+    if (cpuC > 0 && humC === 0) score += cpuC * cpuC * 3;
+    if (humC > 0 && cpuC === 0) score -= humC * humC * 3;
+  }
+  if (state.board[4] === CPU) score += 2;
+  if (state.board[4] === HUMAN) score -= 2;
+  return score;
+}
+function minimax(state, player, depth, alpha, beta) {
+  const winner = getWinner(state.board);
+  if (winner === CPU) return { score: 1000 + depth };
+  if (winner === HUMAN) return { score: -1000 - depth };
+  if (depth === 0) return { score: evaluate(state) };
+  const moves = availableMoves(state.board);
+  if (moves.length === 0) return { score: 0 };
+  let bestMove = moves[0];
+  if (player === CPU) {
+    let best = -Infinity;
+    for (const m of moves) {
+      const ns = simulateMove(state, player, m);
+      const { score } = minimax(ns, HUMAN, depth - 1, alpha, beta);
+      if (score > best) { best = score; bestMove = m; }
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return { score: best, move: bestMove };
+  } else {
+    let best = Infinity;
+    for (const m of moves) {
+      const ns = simulateMove(state, player, m);
+      const { score } = minimax(ns, CPU, depth - 1, alpha, beta);
+      if (score < best) { best = score; bestMove = m; }
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return { score: best, move: bestMove };
+  }
+}
+
+function cpuMove() {
+  if (gameOver) return;
+  const state = {
+    board: [...board],
+    queues: { X: [...queues.X], O: [...queues.O] }
+  };
+  const moves = availableMoves(board);
+  let chosen;
+  if (persist.difficulty === 'easy') {
+    chosen = moves[Math.floor(Math.random() * moves.length)];
+  } else if (persist.difficulty === 'medium') {
+    if (Math.random() < 0.5) {
+      chosen = moves[Math.floor(Math.random() * moves.length)];
+    } else {
+      const result = minimax(state, CPU, 2, -Infinity, Infinity);
+      chosen = result.move !== undefined ? result.move : moves[0];
+    }
+  } else {
+    const result = minimax(state, CPU, 4, -Infinity, Infinity);
+    chosen = result.move !== undefined ? result.move : moves[0];
+  }
+  makeMove(CPU, chosen);
+}
+
+const playBtn = document.getElementById('modePlay');
+const trainBtn = document.getElementById('modeTrain');
+const resetBtn = document.getElementById('resetBtn');
+
+playBtn.addEventListener('click', () => {
+  sounds.click();
+  mode = 'play';
+  playBtn.classList.add('active');
+  trainBtn.classList.remove('active');
+  difficultyBar.style.display = 'none';
+  infoEl.innerHTML = '<b>2-Player Mode:</b> Take turns. After your 3rd mark, the next move erases your oldest one.';
+  reset();
+  updateScoreDisplay();
+  updateHintsUI();
+});
+
+trainBtn.addEventListener('click', () => {
+  sounds.click();
+  mode = 'train';
+  trainBtn.classList.add('active');
+  playBtn.classList.remove('active');
+  difficultyBar.style.display = 'flex';
+  infoEl.innerHTML = '<b>vs Computer:</b> Use 👁️ to toggle vanish hints. Pick difficulty above.';
+  reset();
+  updateScoreDisplay();
+  updateHintsUI();
+});
+
+resetBtn.addEventListener('click', () => { sounds.click(); reset(); });
+
+document.querySelectorAll('.difficulty button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    sounds.click();
+    document.querySelectorAll('.difficulty button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    persist.difficulty = btn.dataset.diff;
+    save();
+    reset();
+  });
+});
+
+function openModal(id) { document.getElementById(id).classList.add('show'); sounds.click(); }
+function closeModal(el) { el.closest('.modal-overlay').classList.remove('show'); }
+document.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', e => closeModal(e.target)));
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+});
+
+document.getElementById('namesBtn').addEventListener('click', () => {
+  document.getElementById('inputX').value = persist.names.X;
+  document.getElementById('inputO').value = persist.names.O;
+  openModal('namesModal');
+});
+document.getElementById('saveNames').addEventListener('click', e => {
+  const x = document.getElementById('inputX').value.trim() || 'Player X';
+  const o = document.getElementById('inputO').value.trim() || 'Player O';
+  persist.names = { X: x, O: o };
+  save();
+  updateScoreDisplay();
+  updateStatus();
+  closeModal(e.target);
+});
+
+document.getElementById('themeBtn').addEventListener('click', () => openModal('themeModal'));
+document.querySelectorAll('.theme-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    sounds.toggle();
+    document.querySelectorAll('.theme-swatch').forEach(t => t.classList.remove('active'));
+    s.classList.add('active');
+    applyTheme(s.dataset.theme);
+  });
+});
+function applyTheme(name) {
+  document.body.classList.remove('theme-dark','theme-light','theme-cyber');
+  document.body.classList.add('theme-' + name);
+  persist.theme = name;
+  save();
+}
+
+document.getElementById('historyBtn').addEventListener('click', () => {
+  renderHistory();
+  openModal('historyModal');
+});
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (persist.history.length === 0) {
+    list.innerHTML = '<div class="history-empty">No games played yet.<br>Win one to see it here! 🎮</div>';
+    return;
+  }
+  list.innerHTML = persist.history.map(h => {
+    const cls = h.winner === 'X' ? 'win-x' : h.winner === 'O' ? 'win-o' : 'draw';
+    const time = new Date(h.time);
+    const timeStr = time.toLocaleDateString() + ' ' + time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    return `<li class="history-item">
+      <span><span class="history-result ${cls}">${h.winnerName}</span> · ${h.mode}</span>
+      <span class="history-time">${timeStr}</span>
+    </li>`;
+  }).join('');
+}
+document.getElementById('clearHistory').addEventListener('click', () => {
+  if (confirm('Clear all match history?')) {
+    persist.history = [];
+    save();
+    renderHistory();
+  }
+});
+
+const soundBtn = document.getElementById('soundBtn');
+function updateSoundIcon() { soundBtn.textContent = persist.sound ? '🔊' : '🔇'; }
+soundBtn.addEventListener('click', () => {
+  persist.sound = !persist.sound;
+  save();
+  updateSoundIcon();
+  if (persist.sound) sounds.toggle();
+});
+
+document.getElementById('hintsBtn').addEventListener('click', () => {
+  persist.showHints = !persist.showHints;
+  save();
+  sounds.toggle();
+  updateHintsUI();
+  render();
+  updateStatus();
+});
+
+document.getElementById('resetScoreBtn').addEventListener('click', () => {
+  if (confirm('Reset score counter? (history will be kept)')) {
+    persist.scores = { X: 0, O: 0, draws: 0 };
+    save();
+    updateScoreDisplay();
+    sounds.click();
+  }
+});
+
+applyTheme(persist.theme);
+updateSoundIcon();
+updateHintsUI();
+document.querySelectorAll('.difficulty button').forEach(b => {
+  b.classList.toggle('active', b.dataset.diff === persist.difficulty);
+});
+updateScoreDisplay();
+buildBoard();
+updateStatus();
+</script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('PWA ready - Service Worker registered'))
+      .catch(err => console.log('Service Worker registration failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
