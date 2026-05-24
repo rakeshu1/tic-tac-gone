@@ -1,5 +1,5 @@
 // Bump this version whenever you ship updates - old caches will be purged
-const CACHE_VERSION = 'tictacgone-v2';
+const CACHE_VERSION = 'tictacgone-v3';
 
 const ASSETS = [
   './',
